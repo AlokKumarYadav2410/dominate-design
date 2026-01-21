@@ -5,14 +5,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dominate</title>
-    <link rel="stylesheet" href="./css/style.css">
     <link rel="stylesheet" href="./css/theme.css">
+    <link rel="stylesheet" href="./css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.8.0/fonts/remixicon.css" rel="stylesheet" />
 
 </head>
 
 <body>
     <header id="toolbar">
         <h1>Dominate</h1>
+        <div class="tools">
+            <i class="ri-rectangle-line" id="rectangle" title="Add Rectangle"></i>
+            <i class="ri-checkbox-blank-circle-line" id="circle" title="Add Circle"></i>
+            <i class="ri-text" id="text" title="Add Text"></i>
+            <label for="image-input">
+                <i class="ri-image-add-fill" id="image" title="Add Image"></i>
+                <input type="file" name="image-input" id="image-input" accept="image/*" hidden>
+            </label>
+            <i class="ri-delete-bin-line" id="delete" title="Delete Selected Element"></i>
+        </div>
     </header>
 
     <main id="editor">
@@ -31,7 +42,7 @@
         </aside>
     </main>
 
-    <script src="script.js"></script>
+    <script src="./js/script.js"></script>
 </body>
 
 </html>
