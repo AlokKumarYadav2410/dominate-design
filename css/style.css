@@ -120,38 +120,40 @@ html {
     border-color: var(--border-primary-color);
 }
 
+.tools i:active {
+    transform: scale(0.95);
+}
+
+.tools #delete:hover{
+    background-color: var(--bg-danger-color);
+    color: var(--text-primary-color);
+}
+
 .rectangle {
     width: 100px;
     height: 100px;
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     border: 2px solid var(--border-active-color);
-    /* border: 2px dashed var(--border-active-color); */
     background-color: rgba(38, 142, 38, 0.3);
+    cursor: move;
 }
 
 .circle {
     width: 100px;
     height: 100px;
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     border: 2px solid var(--border-active-color);
     border-radius: 50%;
     background-color: rgba(204, 0, 0, 0.3);
+    cursor: move;
 }
 
 .image-element {
     width: 250px;
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
     border: 2px solid var(--border-active-color);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    cursor: move;
 }
