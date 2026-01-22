@@ -1,5 +1,5 @@
 const state = {
-  elements: [],
+  elements: localStorage.getItem('canvasState') ? JSON.parse(localStorage.getItem('canvasState')).elements : [],
   selectedId: null
 };
 
@@ -11,13 +11,14 @@ let imageBtn = document.querySelector('#image');
 let deleteBtn = document.querySelector('#delete');
 let canvas = document.getElementById('canvas');
 
-
 rectangle.addEventListener('click', createRectangle);
 circle.addEventListener('click', createCircle);
 textBtn.addEventListener('click', createText);
 imageBtn.addEventListener('click', () => {
   imageInput.click();
 });
+
+state.elements.forEach(el => renderElement(el));
 
 function generateId() {
   return 'id_' + Date.now();
@@ -122,11 +123,11 @@ function imageUpload(imageSrc) {
 
 function renderElement(el) {
   const div = document.createElement('div');
-  const resizeHandle = document.createElement('div');
+  // const resizeHandle = document.createElement('div');
   div.dataset.id = el.id;
   div.classList.add(el.type);
-  resizeHandle.classList.add('resize');
-  div.appendChild(resizeHandle);
+  // resizeHandle.classList.add('resize');
+  // div.appendChild(resizeHandle);
 
   div.style.left = el.x + 'px';
   div.style.top = el.y + 'px';
@@ -169,6 +170,8 @@ function renderElement(el) {
     });
     div.appendChild(span);
   }
+
+  saveState();
   canvas.appendChild(div);
 }
 
@@ -199,4 +202,12 @@ function createText() {
 
   state.elements.push(element);
   renderElement(element);
+}
+
+function saveState() {
+  const safeState = {
+    elements: state.elements.filter(el => el.type !== 'image-element')
+  };
+
+  localStorage.setItem('canvasState', JSON.stringify(safeState));
 }
