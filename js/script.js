@@ -19,6 +19,8 @@ imageBtn.addEventListener('click', () => {
   imageInput.click();
 });
 
+deleteBtn.addEventListener('click', deleteSelectedElement);
+
 state.elements.forEach(elem => renderElement(elem));
 
 function generateId() {
@@ -152,13 +154,9 @@ function createText() {
 }
 
 canvas.addEventListener('click', (e) => {
-  let target = e.target;
+  const target = e.target.closest('[data-id]');
 
-  while (target && target !== canvas && !target.dataset.id) {
-    target = target.parentElement;
-  }
-
-  if (!target || target === canvas) {
+  if (!target || !canvas.contains(target)) {
     clearSelection();
     return;
   }
@@ -187,6 +185,20 @@ function clearSelection() {
   );
   elem?.classList.remove('selected');
   elem?.removeChild(resizeHandle);
+  state.selectedId = null;
+}
+
+function deleteSelectedElement() {
+  if (!state.selectedId) return;
+
+  state.elements = state.elements.filter(el => el.id !== state.selectedId);
+
+  const elemDOM = canvas.querySelector(`[data-id="${state.selectedId}"]`);
+  if (elemDOM) {
+    elemDOM.remove();
+  }
+
+  saveState();
   state.selectedId = null;
 }
 
