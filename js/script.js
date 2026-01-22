@@ -14,11 +14,12 @@ let canvas = document.getElementById('canvas');
 rectangle.addEventListener('click', createRectangle);
 circle.addEventListener('click', createCircle);
 textBtn.addEventListener('click', createText);
+
 imageBtn.addEventListener('click', () => {
   imageInput.click();
 });
 
-state.elements.forEach(el => renderElement(el));
+state.elements.forEach(elem => renderElement(elem));
 
 function generateId() {
   return 'id_' + Date.now();
@@ -121,6 +122,74 @@ function imageUpload(imageSrc) {
   renderElement(element);
 }
 
+function createText() {
+  const width = 200;
+  const height = 50;
+  const x = (canvas.clientWidth - width) / 2;
+  const y = (canvas.clientHeight - height) / 2;
+
+  const element = {
+    id: generateId(),
+    type: 'text',
+    x: x,
+    y: y,
+    width: width,
+    height: height,
+    rotation: 0,
+    styles: {
+      backgroundColor: '',
+      text: 'New Text',
+      fontSize: 16,
+      color: '#000',
+      fontFamily: 'Arial',
+      fontWeight: 'normal'
+    },
+    zIndex: state.elements.length + 1
+  };
+
+  state.elements.push(element);
+  renderElement(element);
+}
+
+canvas.addEventListener('click', (e) => {
+  let target = e.target;
+
+  while (target && target !== canvas && !target.dataset.id) {
+    target = target.parentElement;
+  }
+
+  if (!target || target === canvas) {
+    clearSelection();
+    return;
+  }
+
+  selectElement(target.dataset.id);
+});
+
+const resizeHandle = document.createElement('div');
+resizeHandle.classList.add('resize');
+
+function selectElement(id) {
+  clearSelection();
+  state.selectedId = id;
+
+  const elem = document.querySelector(`[data-id="${id}"]`);
+  elem.classList.add('selected');
+
+  elem.appendChild(resizeHandle);
+}
+
+function clearSelection() {
+  if (!state.selectedId) return;
+
+  const elem = document.querySelector(
+    `[data-id="${state.selectedId}"]`
+  );
+  elem?.classList.remove('selected');
+  elem?.removeChild(resizeHandle);
+  state.selectedId = null;
+}
+
 function renderElement(el) {
   const div = document.createElement('div');
   // const resizeHandle = document.createElement('div');
@@ -173,35 +242,6 @@ function renderElement(el) {
 
   saveState();
   canvas.appendChild(div);
-}
-
-function createText() {
-  const width = 200;
-  const height = 50;
-  const x = (canvas.clientWidth - width) / 2;
-  const y = (canvas.clientHeight - height) / 2;
-
-  const element = {
-    id: generateId(),
-    type: 'text',
-    x: x,
-    y: y,
-    width: width,
-    height: height,
-    rotation: 0,
-    styles: {
-      backgroundColor: '',
-      text: 'New Text',
-      fontSize: 16,
-      color: '#000',
-      fontFamily: 'Arial',
-      fontWeight: 'normal'
-    },
-    zIndex: state.elements.length + 1
-  };
-
-  state.elements.push(element);
-  renderElement(element);
 }
 
 function saveState() {
