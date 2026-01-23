@@ -10,6 +10,10 @@ let imageInput = document.querySelector('#image-input');
 let imageBtn = document.querySelector('#image');
 let deleteBtn = document.querySelector('#delete');
 let canvas = document.getElementById('canvas');
+let layersPanel = document.querySelector('.layers-list');
+let propertiesPanel = document.querySelector('.properties-list');
+let selectionMessage = document.querySelector('.selection');
+let noLayersMessage = document.querySelector('.no-layers');
 
 rectangle.addEventListener('click', createRectangle);
 circle.addEventListener('click', createCircle);
@@ -22,6 +26,10 @@ imageBtn.addEventListener('click', () => {
 deleteBtn.addEventListener('click', deleteSelectedElement);
 
 state.elements.forEach(elem => renderElement(elem));
+
+// Initialize layers from saved state
+state.elements.forEach(elem => addLayerToPanel(elem));
+updateLayersPanelVisibility();
 
 let resizeDirection = null;
 let startX, startY, startW, startH, startLeft, startTop;
@@ -44,6 +52,7 @@ function createRectangle() {
     width: width,
     height: height,
     rotation: 0,
+    opacity: 100,
     styles: {
       backgroundColor: '',
       text: '',
@@ -54,6 +63,8 @@ function createRectangle() {
 
   state.elements.push(element);
   renderElement(element);
+  addLayerToPanel(element);
+  updateLayersPanelVisibility();
 }
 
 function createCircle() {
@@ -71,6 +82,7 @@ function createCircle() {
     width: width,
     height: height,
     rotation: 0,
+    opacity: 100,
     styles: {
       backgroundColor: '',
       borderRadius: '',
@@ -82,6 +94,8 @@ function createCircle() {
 
   state.elements.push(element);
   renderElement(element);
+  addLayerToPanel(element);
+  updateLayersPanelVisibility();
 }
 
 imageInput.addEventListener('change', (event) => {
@@ -114,6 +128,7 @@ function imageUpload(imageSrc) {
     width: width,
     height: height,
     rotation: 0,
+    opacity: 100,
     styles: {
       backgroundColor: '',
       borderRadius: '',
@@ -125,6 +140,8 @@ function imageUpload(imageSrc) {
 
   state.elements.push(element);
   renderElement(element);
+  addLayerToPanel(element);
+  updateLayersPanelVisibility();
 }
 
 function createText() {
@@ -141,6 +158,7 @@ function createText() {
     width: width,
     height: height,
     rotation: 0,
+    opacity: 100,
     styles: {
       backgroundColor: '',
       text: 'New Text',
@@ -154,37 +172,41 @@ function createText() {
 
   state.elements.push(element);
   renderElement(element);
+  addLayerToPanel(element);
+  updateLayersPanelVisibility();
 }
-
-canvas.addEventListener('click', (e) => {
-  const target = e.target.closest('[data-id]');
-
-  if (!target || !canvas.contains(target)) {
-    clearSelection();
-    return;
-  }
-
-  selectElement(target.dataset.id);
-});
 
 function selectElement(id) {
   clearSelection();
   state.selectedId = id;
 
-  const elem = document.querySelector(`[data-id="${id}"]`);
+  const elem = canvas.querySelector(`[data-id="${id}"]`);
+  if (!elem) return;
   elem.classList.add('selected');
 
   elem.querySelectorAll('.resize-handle').forEach(h => h.remove());
   createResizeHandles(elem);
+  
+  selectLayerInPanel(id);
+  
+  showPropertiesPanel(id);
 }
 
 function clearSelection() {
-  if (!state.selectedId) return;
-
-  const elem = document.querySelector(`[data-id="${state.selectedId}"]`);
-
-  elem?.classList.remove('selected');
-  elem?.querySelectorAll('.resize-handle').forEach(h => h.remove());
+  if (state.selectedId) {
+    const elem = canvas.querySelector(`[data-id="${state.selectedId}"]`);
+    if (elem) {
+      elem.classList.remove('selected');
+      elem.querySelectorAll('.resize-handle').forEach(h => h.remove());
+    }
+  }
+  
+  layersPanel.querySelectorAll('.layer-item').forEach(item => {
+    item.classList.remove('selected');
+  });
+  
+  hidePropertiesPanel();
+  
   state.selectedId = null;
 }
 
@@ -197,6 +219,8 @@ function deleteSelectedElement() {
   if (elemDOM) {
     elemDOM.remove();
   }
+  
+  removeLayerFromPanel(state.selectedId);
 
   saveState();
   state.selectedId = null;
@@ -241,7 +265,10 @@ canvas.addEventListener('mousedown', (e) => {
   if (e.target.classList.contains('resize-handle')) return;
 
   const target = e.target.closest('[data-id]');
-  if (!target) return;
+  if (!target) {
+    clearSelection();
+    return;
+  }
 
   selectElement(target.dataset.id);
 
@@ -277,7 +304,6 @@ document.addEventListener('mousemove', (e) => {
     clampElementToCanvas(elem);
     updateDOM(elem);
     updateDOMSize(elem);
-    saveState();
     return;
   }
 
@@ -292,26 +318,16 @@ document.addEventListener('mousemove', (e) => {
 
   clampElementToCanvas(elem);
   updateDOM(elem);
-  saveState();
 });
 
 document.addEventListener('mouseup', () => {
+  if (isDragging || isResizing) {
+    saveState();
+  }
   isDragging = false;
   isResizing = false;
   resizeDirection = null;
 });
-
-function updateDOM(elem) {
-  const dom = document.querySelector(`[data-id="${elem.id}"]`);
-  dom.style.left = elem.x + 'px';
-  dom.style.top = elem.y + 'px';
-}
-
-function updateDOMSize(elem) {
-  const dom = document.querySelector(`[data-id="${elem.id}"]`);
-  dom.style.width = elem.width + 'px';
-  dom.style.height = elem.height + 'px';
-}
 
 function renderElement(el) {
   const div = document.createElement('div');
@@ -323,6 +339,18 @@ function renderElement(el) {
   div.style.width = el.width + 'px';
   div.style.height = el.height + 'px';
   div.style.zIndex = el.zIndex;
+  
+  if (el.rotation) {
+    div.style.transform = `rotate(${el.rotation}deg)`;
+  }
+  
+  if (el.opacity) {
+    div.style.opacity = el.opacity / 100;
+  }
+  
+  if ((el.type === 'rectangle' || el.type === 'circle') && el.styles.backgroundColor) {
+    div.style.backgroundColor = el.styles.backgroundColor;
+  }
 
   if (el.type === 'image-element' && el.styles.imageSrc) {
     const img = document.createElement('img');
@@ -333,13 +361,14 @@ function renderElement(el) {
     img.style.pointerEvents = 'none';
     div.appendChild(img);
   }
+  
   if (el.type === 'text') {
     const span = document.createElement('span');
     span.textContent = el.styles.text;
-    span.style.fontSize = el.styles.fontSize + 'px';
-    span.style.color = el.styles.color;
-    span.style.fontFamily = el.styles.fontFamily;
-    span.style.fontWeight = el.styles.fontWeight;
+    span.style.fontSize = (el.styles.fontSize || 16) + 'px';
+    span.style.color = el.styles.color || 'rgb(200, 200, 200)';
+    span.style.fontFamily = el.styles.fontFamily || 'Arial';
+    span.style.fontWeight = el.styles.fontWeight || 'normal';
     span.style.display = 'flex';
     span.style.alignItems = 'center';
     span.style.justifyContent = 'center';
@@ -360,8 +389,8 @@ function renderElement(el) {
     div.appendChild(span);
   }
 
-  saveState();
   canvas.appendChild(div);
+  saveState();
 }
 
 function clampElementToCanvas(elem) {
@@ -372,10 +401,326 @@ function clampElementToCanvas(elem) {
   elem.y = Math.max(0, Math.min(elem.y, maxY));
 }
 
+function updateDOM(elem) {
+  const dom = canvas.querySelector(`[data-id="${elem.id}"]`);
+  dom.style.left = elem.x + 'px';
+  dom.style.top = elem.y + 'px';
+}
+
+function updateDOMSize(elem) {
+  const dom = canvas.querySelector(`[data-id="${elem.id}"]`);
+  dom.style.width = elem.width + 'px';
+  dom.style.height = elem.height + 'px';
+}
+
 function saveState() {
   const safeState = {
     elements: state.elements.filter(el => el.type !== 'image-element')
   };
 
   localStorage.setItem('canvasState', JSON.stringify(safeState));
+}
+
+// LAYERS PANEL FUNCTIONS
+function addLayerToPanel(elem) {
+  const layerItem = document.createElement('div');
+  layerItem.className = 'layer-item';
+  layerItem.dataset.id = elem.id;
+  
+  const layerIcon = document.createElement('span');
+  layerIcon.className = 'layer-icon';
+  layerIcon.innerHTML = getElementIcon(elem.type);
+  
+  const layerName = document.createElement('span');
+  layerName.className = 'layer-name';
+  layerName.textContent = elem.type.charAt(0).toUpperCase() + elem.type.slice(1);
+  
+  const layerVisibility = document.createElement('i');
+  layerVisibility.className = 'ri-eye-line layer-visibility';
+  layerVisibility.dataset.visible = 'true';
+  
+  layerItem.appendChild(layerIcon);
+  layerItem.appendChild(layerName);
+  layerItem.appendChild(layerVisibility);
+  
+  // Click to select
+  layerItem.addEventListener('click', (e) => {
+    e.stopPropagation();
+    selectElement(elem.id);
+  });
+  
+  // Visibility toggle
+  layerVisibility.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isVisible = layerVisibility.dataset.visible === 'true';
+    const elemDOM = canvas.querySelector(`[data-id="${elem.id}"]`);
+    
+    if (isVisible) {
+      elemDOM.style.display = 'none';
+      layerVisibility.className = 'ri-eye-off-line layer-visibility';
+      layerVisibility.dataset.visible = 'false';
+    } else {
+      elemDOM.style.display = 'block';
+      layerVisibility.className = 'ri-eye-line layer-visibility';
+      layerVisibility.dataset.visible = 'true';
+    }
+  });
+  
+  // Drag to reorder
+  layerItem.draggable = true;
+  layerItem.addEventListener('dragstart', handleLayerDragStart);
+  layerItem.addEventListener('dragover', handleLayerDragOver);
+  layerItem.addEventListener('drop', handleLayerDrop);
+  layerItem.addEventListener('dragend', handleLayerDragEnd);
+  
+  layersPanel.appendChild(layerItem);
+}
+
+function getElementIcon(type) {
+  const icons = {
+    'rectangle': '<i class="ri-rectangle-line"></i>',
+    'circle': '<i class="ri-checkbox-blank-circle-line"></i>',
+    'text': '<i class="ri-text"></i>',
+    'image-element': '<i class="ri-image-fill"></i>'
+  };
+  return icons[type] || '<i class="ri-shape-line"></i>';
+}
+
+function removeLayerFromPanel(id) {
+  const layerItem = layersPanel.querySelector(`[data-id="${id}"]`);
+  if (layerItem) {
+    layerItem.remove();
+  }
+  updateLayersPanelVisibility();
+}
+
+function updateLayersPanelVisibility() {
+  if (state.elements.length === 0) {
+    noLayersMessage.classList.remove('hidden');
+  } else {
+    noLayersMessage.classList.add('hidden');
+  }
+}
+
+function selectLayerInPanel(id) {
+  layersPanel.querySelectorAll('.layer-item').forEach(item => {
+    item.classList.remove('selected');
+  });
+  
+  const layerItem = layersPanel.querySelector(`[data-id="${id}"]`);
+  if (layerItem) {
+    layerItem.classList.add('selected');
+  }
+}
+
+// Drag and drop for layers
+let draggedLayer = null;
+
+function handleLayerDragStart(e) {
+  draggedLayer = this;
+  this.classList.add('dragging');
+}
+
+function handleLayerDragOver(e) {
+  e.preventDefault();
+  if (draggedLayer && draggedLayer !== this) {
+    this.parentNode.insertBefore(draggedLayer, this);
+  }
+}
+
+function handleLayerDrop(e) {
+  e.preventDefault();
+}
+
+function handleLayerDragEnd(e) {
+  this.classList.remove('dragging');
+  updateZIndexFromLayers();
+}
+
+function updateZIndexFromLayers() {
+  const layerItems = layersPanel.querySelectorAll('.layer-item');
+  layerItems.forEach((item, index) => {
+    const elem = state.elements.find(el => el.id === item.dataset.id);
+    if (elem) {
+      elem.zIndex = index + 1;
+      const domElem = canvas.querySelector(`[data-id="${elem.id}"]`);
+      if (domElem) {
+        domElem.style.zIndex = index + 1;
+      }
+    }
+  });
+  saveState();
+}
+
+// PROPERTIES PANEL FUNCTIONS 
+function showPropertiesPanel(id) {
+  const elem = state.elements.find(el => el.id === id);
+  if (!elem) return;
+  
+  selectionMessage.classList.add('hidden');
+  propertiesPanel.innerHTML = '';
+  
+  if (!elem.opacity) {
+    elem.opacity = 100;
+  }
+  
+  addPropertyInput('width', 'Width:', elem.width, (value) => {
+    elem.width = Math.max(20, parseInt(value));
+    updateDOMSize(elem);
+    saveState();
+  });
+  
+  addPropertyInput('height', 'Height:', elem.height, (value) => {
+    elem.height = Math.max(20, parseInt(value));
+    updateDOMSize(elem);
+    saveState();
+  });
+  
+  addPropertyColorInput('color', 'Color:', elem.styles.backgroundColor || elem.styles.color || '#ffffff', (value) => {
+    if (elem.type === 'text') {
+      elem.styles.color = value;
+      const domElem = canvas.querySelector(`[data-id="${elem.id}"]`);
+      const span = domElem?.querySelector('span');
+      if (span) span.style.color = value;
+    } else {
+      elem.styles.backgroundColor = value;
+      const domElem = canvas.querySelector(`[data-id="${elem.id}"]`);
+      if (domElem) {
+        domElem.style.backgroundColor = value;
+      }
+    }
+    saveState();
+  });
+  
+  addPropertyInput('rotation', 'Rotation:', elem.rotation || 0, (value) => {
+    elem.rotation = parseInt(value) % 360;
+    const domElem = canvas.querySelector(`[data-id="${elem.id}"]`);
+    if (domElem) {
+      domElem.style.transform = `rotate(${elem.rotation}deg)`;
+    }
+    saveState();
+  }, 'range', 0, 360);
+  
+  addPropertyInput('opacity', 'Opacity:', elem.opacity, (value) => {
+    elem.opacity = parseInt(value);
+    const domElem = canvas.querySelector(`[data-id="${elem.id}"]`);
+    if (domElem) {
+      domElem.style.opacity = parseInt(value) / 100;
+    }
+    saveState();
+  }, 'range', 0, 100);
+  
+  // Type-specific properties for TEXT
+  if (elem.type === 'text') {
+    addPropertyInput('text-content', 'Text:', elem.styles.text, (value) => {
+      elem.styles.text = value;
+      const domElem = canvas.querySelector(`[data-id="${elem.id}"]`);
+      const span = domElem?.querySelector('span');
+      if (span) span.textContent = value;
+      saveState();
+    }, 'text');
+    
+    addPropertyInput('font-size', 'Font Size (px):', elem.styles.fontSize || 16, (value) => {
+      elem.styles.fontSize = parseInt(value);
+      const domElem = canvas.querySelector(`[data-id="${elem.id}"]`);
+      const span = domElem?.querySelector('span');
+      if (span) span.style.fontSize = elem.styles.fontSize + 'px';
+      saveState();
+    });
+  }
+}
+
+function hidePropertiesPanel() {
+  selectionMessage.classList.remove('hidden');
+  propertiesPanel.innerHTML = '';
+}
+
+function addPropertyInput(id, label, value, onChange, type = 'number', min = '0', max = '100') {
+  const label_el = document.createElement('label');
+  label_el.htmlFor = id;
+  label_el.className = 'property-label';
+  
+  const labelText = document.createElement('span');
+  labelText.textContent = label;
+  
+  const input = document.createElement('input');
+  input.type = type;
+  input.id = id;
+  input.value = value;
+  input.className = 'property-input';
+  
+  if (type === 'range') {
+    input.min = min;
+    input.max = max;
+    
+    const valueDisplay = document.createElement('span');
+    valueDisplay.className = 'range-value';
+    valueDisplay.textContent = value;
+    
+    input.addEventListener('input', (e) => {
+      valueDisplay.textContent = e.target.value;
+      onChange(e.target.value);
+    });
+    
+    label_el.appendChild(labelText);
+    label_el.appendChild(input);
+    label_el.appendChild(valueDisplay);
+  } else {
+    input.min = min;
+    input.addEventListener('input', (e) => onChange(e.target.value));
+    
+    label_el.appendChild(labelText);
+    label_el.appendChild(input);
+  }
+  
+  propertiesPanel.appendChild(label_el);
+}
+
+function addPropertyColorInput(id, label, value, onChange) {
+  const label_el = document.createElement('label');
+  label_el.htmlFor = id;
+  label_el.className = 'property-label';
+  
+  const labelText = document.createElement('span');
+  labelText.textContent = label;
+  
+  const input = document.createElement('input');
+  input.type = 'color';
+  input.id = id;
+  input.value = rgbToHex(value) || '#ffffff';
+  input.className = 'property-input color-picker';
+  
+  input.addEventListener('input', (e) => onChange(hexToRgb(e.target.value)));
+  
+  label_el.appendChild(labelText);
+  label_el.appendChild(input);
+  
+  propertiesPanel.appendChild(label_el);
+}
+
+// Color conversion utilities
+function rgbToHex(rgb) {
+  if (!rgb || rgb === '') return '#ffffff';
+  const result = rgb.match(/\d+/g);
+  if (!result || result.length < 3) return '#ffffff';
+  
+  const r = parseInt(result[0]);
+  const g = parseInt(result[1]);
+  const b = parseInt(result[2]);
+  
+  return '#' + [r, g, b].map(x => {
+    const hex = x.toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  }).join('');
+}
+
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (!result) return 'rgb(200, 200, 200)';
+  
+  const r = parseInt(result[1], 16);
+  const g = parseInt(result[2], 16);
+  const b = parseInt(result[3], 16);
+  
+  return `rgb(${r}, ${g}, ${b})`;
 }
