@@ -15,6 +15,12 @@ html {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
         Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue',
         sans-serif;
+
+}
+
+html::selection {
+    background: var(--bg-active-color);
+    color: var(--text-active-color);
 }
 
 /* TOOLBAR */
@@ -53,13 +59,19 @@ html {
     width: 100%;
     height: 100vh;
     background-color: var(--bg-primary-color);
-    display: flex;
+    /* display: flex; */
+    display: grid;
+    grid-template-areas:
+        "layers-panel canvas properties-panel"
+        "layers-panel canvas properties-panel";
+    grid-template-columns: 15% 1fr 15%;
 }
 
 /* PANELS */
 #layers-panel {
-    width: 15%;
+    /* width: 15%; */
     height: 100%;
+    grid-area: layers-panel;
     background-color: var(--bg-secondary-color);
     border-right: 1px solid var(--border-active-color);
     padding: 10px;
@@ -76,7 +88,8 @@ html {
     color: var(--text-secondary-color);
     font-style: italic;
     width: 100%;
-    height: 100%;
+    height: 10%;
+    border: 2px dashed var(--border-active-color);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -132,13 +145,76 @@ html {
     transform: scale(0.98);
 }
 
+/* Layer Item Styles */
+.layer-item {
+    display: flex;
+    align-items: center;
+    gap: var(--gutter-sm);
+    padding: var(--padding-sm);
+    background-color: var(--bg-primary-color);
+    border: 1px solid var(--border-active-color);
+    border-radius: var(--border-radius-sm);
+    color: var(--text-primary-color);
+    cursor: grab;
+    transition: all 0.2s ease-in-out;
+    user-select: none;
+}
+
+.layer-item:hover {
+    background-color: var(--bg-active-color);
+    color: var(--text-active-color);
+    border-color: var(--border-primary-color);
+}
+
+.layer-item.selected {
+    background-color: var(--bg-active-color);
+    color: var(--text-active-color);
+    border-color: var(--border-primary-color);
+    outline: 2px solid var(--border-primary-color);
+}
+
+.layer-item.dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.layer-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-md);
+    width: 20px;
+    height: 20px;
+}
+
+.layer-name {
+    flex: 1;
+    font-size: var(--font-size-md);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.layer-visibility {
+    font-size: var(--font-size-md);
+    cursor: pointer;
+    padding: var(--padding-xs);
+    transition: all 0.2s ease-in-out;
+}
+
+.layer-visibility:hover {
+    transform: scale(1.1);
+    color: var(--border-primary-color);
+}
+
 #properties-panel {
-    width: 15%;
+    /* width: 15%; */
     height: 100%;
+    grid-area: properties-panel;
     background-color: var(--bg-secondary-color);
     border-left: 1px solid var(--border-active-color);
     padding: 10px;
-    overflow-y: auto;
+    /* overflow-y: auto; */
 }
 
 #properties-panel h3 {
@@ -151,7 +227,8 @@ html {
     color: var(--text-secondary-color);
     font-style: italic;
     width: 100%;
-    height: 100%;
+    height: 10%;
+    border: 2px dashed var(--border-active-color);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -166,7 +243,7 @@ html {
     flex-direction: column;
     gap: var(--gutter-md);
     overflow-y: auto;
-    height: calc(100% - 150px);
+    height: calc(100% - 50px);
     padding-right: var(--padding-md);
 }
 
@@ -197,10 +274,83 @@ html {
     color: var(--text-active-color);
 }
 
-#rotation, #opacity {
+/* Property Label and Input Styling */
+.property-label {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gutter-xs);
+    color: var(--text-primary-color);
+    font-size: var(--font-size-md);
+    font-weight: 500;
+}
+
+.property-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--gutter-sm);
+}
+
+.property-row .range-value {
+    white-space: nowrap;
+    font-size: var(--font-size-sm);
+}
+
+.property-label span {
+    display: block;
+}
+
+.property-input {
+    padding: var(--padding-sm);
+    border: 1px solid var(--border-active-color);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--bg-primary-color);
+    color: var(--text-primary-color);
+    font-size: var(--font-size-md);
+    transition: all 0.2s ease-in-out;
+}
+
+.property-input:focus {
+    outline: none;
+    border-color: var(--border-primary-color);
+    background-color: var(--bg-active-color);
+    color: var(--text-active-color);
+    box-shadow: 0 0 5px var(--border-primary-color);
+}
+
+.property-input[type="range"] {
+    height: 6px;
+    cursor: grab;
+    padding: 0;
+}
+
+.property-input[type="range"]:active {
+    cursor: grabbing;
+}
+
+.property-input.color-picker {
+    width: 100%;
+    height: 40px;
+    cursor: pointer;
+}
+
+.range-value {
+    display: inline-block;
+    background-color: var(--bg-active-color);
+    color: var(--text-active-color);
+    padding: var(--padding-xs) var(--padding-sm);
+    border-radius: var(--border-radius-sm);
+    font-size: var(--font-size-sm);
+    font-weight: bold;
+}
+
+#rotation,
+#opacity {
     cursor: grab;
 }
-#rotation:active, #opacity:active {
+
+#rotation:active,
+#opacity:active {
     cursor: grabbing;
 }
 
@@ -259,6 +409,7 @@ html {
 /* CANVAS */
 #canvas-wrapper {
     flex: 1;
+    grid-area: canvas;
     height: 100%;
     overflow: auto;
     display: flex;
@@ -272,7 +423,7 @@ html {
 }
 
 #canvas {
-    width: 3000px;
+    width: 4000px;
     height: 2000px;
     overflow: auto;
     position: relative;
