@@ -20,6 +20,7 @@
     --border-active-color: rgb(150, 150, 150);
 
     /* padding */
+    --padding-xs: 0.25rem;
     --padding-sm: 0.5rem;
     --padding-md: 1rem;
     --padding-lg: 1.5rem;
@@ -27,6 +28,7 @@
     --padding-2xl: 3rem;
 
     /* margin */
+    --margin-xs: 0.25rem;
     --margin-sm: 0.5rem;
     --margin-md: 1rem;
     --margin-lg: 1.5rem;
@@ -34,6 +36,7 @@
     --margin-2xl: 3rem;
 
     /* gutter */
+    --gutter-xs: 0.25rem;
     --gutter-sm: 0.5rem;
     --gutter-md: 1rem;
     --gutter-lg: 1.5rem;
