@@ -14,6 +14,11 @@ let layersPanel = document.querySelector('.layers-list');
 let propertiesPanel = document.querySelector('.properties-list');
 let selectionMessage = document.querySelector('.selection');
 let noLayersMessage = document.querySelector('.no-layers');
+let loader = document.querySelector('.loader');
+
+setTimeout(() => {
+    loader.classList.add('hidden');
+}, 2000)
 
 rectangle.addEventListener('click', createRectangle);
 circle.addEventListener('click', createCircle);
