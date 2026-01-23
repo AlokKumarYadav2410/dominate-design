@@ -23,6 +23,9 @@ deleteBtn.addEventListener('click', deleteSelectedElement);
 
 state.elements.forEach(elem => renderElement(elem));
 
+let resizeDirection = null;
+let startX, startY, startW, startH, startLeft, startTop;
+
 function generateId() {
   return 'id_' + Date.now();
 }
@@ -142,7 +145,7 @@ function createText() {
       backgroundColor: '',
       text: 'New Text',
       fontSize: 16,
-      color: '#000',
+      color: 'rgb(200, 200, 200)',
       fontFamily: 'Arial',
       fontWeight: 'normal'
     },
@@ -164,9 +167,6 @@ canvas.addEventListener('click', (e) => {
   selectElement(target.dataset.id);
 });
 
-const resizeHandle = document.createElement('div');
-resizeHandle.classList.add('resize');
-
 function selectElement(id) {
   clearSelection();
   state.selectedId = id;
@@ -174,17 +174,17 @@ function selectElement(id) {
   const elem = document.querySelector(`[data-id="${id}"]`);
   elem.classList.add('selected');
 
-  elem.appendChild(resizeHandle);
+  elem.querySelectorAll('.resize-handle').forEach(h => h.remove());
+  createResizeHandles(elem);
 }
 
 function clearSelection() {
   if (!state.selectedId) return;
 
-  const elem = document.querySelector(
-    `[data-id="${state.selectedId}"]`
-  );
+  const elem = document.querySelector(`[data-id="${state.selectedId}"]`);
+
   elem?.classList.remove('selected');
-  elem?.removeChild(resizeHandle);
+  elem?.querySelectorAll('.resize-handle').forEach(h => h.remove());
   state.selectedId = null;
 }
 
@@ -197,6 +197,7 @@ function deleteSelectedElement() {
   if (elemDOM) {
     elemDOM.remove();
   }
+
   saveState();
   state.selectedId = null;
 }
@@ -204,29 +205,81 @@ function deleteSelectedElement() {
 let dragOffsetX = 0;
 let dragOffsetY = 0;
 let isDragging = false;
+let isResizing = false;
+
+function createResizeHandles(elementDiv) {
+  const directions = ['tl', 'tr', 'bl', 'br'];
+
+  directions.forEach(dir => {
+    const handle = document.createElement('div');
+    handle.className = `resize-handle ${dir}`;
+    handle.dataset.direction = dir;
+
+    handle.addEventListener('mousedown', resizeMouseDown);
+    elementDiv.appendChild(handle);
+  });
+}
+
+function resizeMouseDown(e) {
+  e.stopPropagation();
+
+  const dir = e.target.dataset.direction;
+  resizeDirection = dir;
+  isResizing = true;
+
+  const elem = state.elements.find(el => el.id === state.selectedId);
+
+  startX = e.clientX;
+  startY = e.clientY;
+  startW = elem.width;
+  startH = elem.height;
+  startLeft = elem.x;
+  startTop = elem.y;
+}
 
 canvas.addEventListener('mousedown', (e) => {
+  if (e.target.classList.contains('resize-handle')) return;
+
   const target = e.target.closest('[data-id]');
   if (!target) return;
 
-  const id = target.dataset.id;
-  selectElement(id);
+  selectElement(target.dataset.id);
 
-  const elem = state.elements.find(el => el.id === id);
+  const elem = state.elements.find(el => el.id === target.dataset.id);
   isDragging = true;
 
   dragOffsetX = e.clientX - elem.x;
   dragOffsetY = e.clientY - elem.y;
-
-  console.log('dragOffsetX:', dragOffsetX)
-  console.log('dragOffsetY:', dragOffsetY)
-  console.log('e.clientX:', e.clientX)
-  console.log('e.clientY:', e.clientY)
-  console.log("elem.x", elem.x)
-  console.log("elem.y", elem.y)
 });
 
 document.addEventListener('mousemove', (e) => {
+  if (isResizing && state.selectedId) {
+    const elem = state.elements.find(el => el.id === state.selectedId);
+
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    if (resizeDirection.includes('r')) {
+      elem.width = Math.max(20, startW + dx);
+    }
+    if (resizeDirection.includes('l')) {
+      elem.width = Math.max(20, startW - dx);
+      elem.x = startLeft + dx;
+    }
+    if (resizeDirection.includes('b')) {
+      elem.height = Math.max(20, startH + dy);
+    }
+    if (resizeDirection.includes('t')) {
+      elem.height = Math.max(20, startH - dy);
+      elem.y = startTop + dy;
+    }
+
+    updateDOM(elem);
+    updateDOMSize(elem);
+    saveState();
+    return;
+  }
+
   if (!isDragging || !state.selectedId) return;
 
   const elem = state.elements.find(
@@ -236,17 +289,14 @@ document.addEventListener('mousemove', (e) => {
   elem.x = e.clientX - dragOffsetX;
   elem.y = e.clientY - dragOffsetY;
 
-  console.log("elem.x", elem.x)
-  console.log("elem.y", elem.y)
-  console.log('e.clientX below:', e.clientX)
-  console.log('e.clientY below:', e.clientY)
-
-  saveState();
   updateDOM(elem);
+  saveState();
 });
 
 document.addEventListener('mouseup', () => {
   isDragging = false;
+  isResizing = false;
+  resizeDirection = null;
 });
 
 function updateDOM(elem) {
@@ -255,14 +305,17 @@ function updateDOM(elem) {
   dom.style.top = elem.y + 'px';
 }
 
+function updateDOMSize(elem) {
+  const dom = document.querySelector(`[data-id="${elem.id}"]`);
+  dom.style.width = elem.width + 'px';
+  dom.style.height = elem.height + 'px';
+}
+
 function renderElement(el) {
   const div = document.createElement('div');
-  // const resizeHandle = document.createElement('div');
+
   div.dataset.id = el.id;
   div.classList.add(el.type);
-  // resizeHandle.classList.add('resize');
-  // div.appendChild(resizeHandle);
-
   div.style.left = el.x + 'px';
   div.style.top = el.y + 'px';
   div.style.width = el.width + 'px';

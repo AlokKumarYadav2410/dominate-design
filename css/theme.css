@@ -5,6 +5,8 @@
     --bg-active-color: rgb(233, 233, 233);
     --bg-success-color: rgb(38, 142, 38);
     --bg-danger-color: rgb(204, 0, 0);
+    --bg-warning-color: rgb(255, 165, 0);
+    --bg-info-color: rgb(30, 144, 255);
 
     /* text color */
     --text-primary-color: rgb(235, 235, 235);
