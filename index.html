@@ -27,7 +27,11 @@
     <main id="editor">
         <aside id="layers-panel">
             <h3>Layers</h3>
-
+            <p class="no-layers hidden">No layers yet</p>
+            <div class="layers-list">
+                <!-- Layers will be dynamically added here -->
+                <p draggable="true">Text</p>
+            </div>
         </aside>
 
         <section id="canvas-wrapper">
@@ -36,11 +40,52 @@
 
         <aside id="properties-panel">
             <h3>Properties</h3>
-            <p>Select an element</p>
+            <p class="selection hidden">Select an element</p>
+            <div class="properties-list">
+                <!-- Properties will be dynamically added here -->
+                <label for="width">
+                    Width:
+                    <input type="number" id="width" name="width" min="0">
+                </label>
+                <label for="height">
+                    Height:
+                    <input type="number" id="height" name="height" min="0">
+                </label>
+                <label for="color">
+                    Color:
+                    <input type="color" id="color-picker" name="color">
+                </label>
+                <label for="text">
+                    Text:
+                    <input type="text" id="text" name="text">
+                </label>
+                <label for="font-size">
+                    Font Size:
+                    <input type="number" id="font-size" name="font-size" min="0">
+                </label>
+
+                <label for="rotation">
+                    Rotation: 0 deg
+                    <input type="range" id="rotation" name="rotation" min="0" max="360">
+                </label>
+                <label for="opacity">
+                    Opacity: 100%
+                    <input type="range" id="opacity" name="opacity" min="0" max="100">
+                </label>
+
+            </div>
+            <div class="alignment">
+                <i class="ri-align-left"></i>
+                <i class="ri-align-justify"></i>
+                <i class="ri-align-right"></i>
+                <i class="ri-align-top"></i>
+                <i class="ri-align-vertically"></i>
+                <i class="ri-align-bottom"></i>
+            </div>
         </aside>
     </main>
 
-    <script src="./js/script.js"></script>
+    <script type="module" src="./js/script.js"></script>
 </body>
 
 </html>

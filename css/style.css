@@ -63,7 +63,73 @@ html {
     background-color: var(--bg-secondary-color);
     border-right: 1px solid var(--border-active-color);
     padding: 10px;
+
+}
+
+#layers-panel h3 {
+    margin-bottom: var(--gutter-md);
+    color: var(--text-primary-color);
+    font-size: var(--font-size-xl);
+}
+
+.no-layers {
+    color: var(--text-secondary-color);
+    font-style: italic;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.no-layers.hidden {
+    display: none;
+}
+
+.layers-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gutter-sm);
+    padding: 0 var(--padding-sm) 0 0;
     overflow-y: auto;
+    height: calc(100% - 50px);
+}
+
+.layers-list::-webkit-scrollbar {
+    width: 6px;
+    background-color: var(--bg-primary-color);
+    border-radius: var(--border-radius-md);
+}
+
+.layers-list::-webkit-scrollbar-thumb {
+    background-color: var(--bg-active-color);
+    border-radius: var(--border-radius-md);
+    cursor: grab;
+}
+
+.layers-list::-webkit-scrollbar-thumb:active {
+    cursor: grabbing;
+}
+
+.layers-list p {
+    padding: var(--padding-sm);
+    background-color: var(--bg-primary-color);
+    border: 1px solid var(--border-active-color);
+    border-radius: var(--border-radius-sm);
+    color: var(--text-primary-color);
+    cursor: grab;
+    transition: all 0.2s ease-in-out;
+}
+
+.layers-list p:hover {
+    background-color: var(--bg-active-color);
+    color: var(--text-active-color);
+    border-color: var(--border-primary-color);
+}
+
+.layers-list p:active {
+    cursor: grabbing;
+    transform: scale(0.98);
 }
 
 #properties-panel {
@@ -73,6 +139,121 @@ html {
     border-left: 1px solid var(--border-active-color);
     padding: 10px;
     overflow-y: auto;
+}
+
+#properties-panel h3 {
+    margin-bottom: var(--gutter-md);
+    color: var(--text-primary-color);
+    font-size: var(--font-size-xl);
+}
+
+.selection {
+    color: var(--text-secondary-color);
+    font-style: italic;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.selection.hidden {
+    display: none;
+}
+
+.properties-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gutter-md);
+    overflow-y: auto;
+    height: calc(100% - 150px);
+    padding-right: var(--padding-md);
+}
+
+.properties-list label {
+    color: var(--text-primary-color);
+    font-size: var(--font-size-md);
+    font-weight: 500;
+}
+
+.properties-list input,
+.properties-list select {
+    width: 100%;
+    padding: var(--padding-sm);
+    border: 1px solid var(--border-active-color);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--bg-primary-color);
+    color: var(--text-primary-color);
+    font-size: var(--font-size-md);
+    margin-top: var(--margin-xs);
+    transition: all 0.2s ease-in-out;
+}
+
+.properties-list input:focus,
+.properties-list select:focus {
+    outline: none;
+    border-color: var(--border-primary-color);
+    background-color: var(--bg-active-color);
+    color: var(--text-active-color);
+}
+
+#rotation, #opacity {
+    cursor: grab;
+}
+#rotation:active, #opacity:active {
+    cursor: grabbing;
+}
+
+.properties-list::-webkit-scrollbar {
+    width: 6px;
+    background-color: var(--bg-primary-color);
+    border-radius: var(--border-radius-md);
+}
+
+.properties-list::-webkit-scrollbar-thumb {
+    background-color: var(--bg-active-color);
+    border-radius: var(--border-radius-md);
+    cursor: grab;
+}
+
+.properties-list::-webkit-scrollbar-thumb:active {
+    cursor: grabbing;
+}
+
+
+#color-picker {
+    width: 100%;
+    height: 50px;
+    border: 1px solid var(--border-active-color);
+    border-radius: var(--border-radius-sm);
+    background-color: var(--bg-primary-color);
+    margin-top: var(--margin-xs);
+}
+
+.alignment {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    justify-content: center;
+    align-items: center;
+    /* margin-top: var(--margin-sm); */
+    padding-top: var(--margin-sm);
+    border-top: 2px solid var(--border-active-color);
+    gap: var(--gutter-sm);
+}
+
+.alignment i {
+    text-align: center;
+    color: var(--text-primary-color);
+    font-size: var(--font-size-lg);
+    padding: var(--padding-sm);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.alignment i:hover {
+    background-color: var(--bg-active-color);
+    color: var(--text-active-color);
+    border-radius: var(--border-radius-sm);
 }
 
 /* CANVAS */
@@ -85,7 +266,8 @@ html {
     align-items: center;
 }
 
-#canvas-wrapper::-webkit-scrollbar, #canvas::-webkit-scrollbar {
+#canvas-wrapper::-webkit-scrollbar,
+#canvas::-webkit-scrollbar {
     display: none;
 }
 
@@ -130,7 +312,7 @@ html {
     transform: scale(0.95);
 }
 
-.tools #delete:hover{
+.tools #delete:hover {
     background-color: var(--bg-danger-color);
     color: var(--text-primary-color);
 }
@@ -164,7 +346,7 @@ html {
     cursor: move;
 }
 
-.text{
+.text {
     position: absolute;
     /* border: 2px solid var(--border-active-color); */
     /* padding: var(--padding-sm); */
@@ -173,31 +355,50 @@ html {
 }
 
 .selected {
-  outline: 3px dashed var(--bg-active-color);
+    outline: 3px dashed var(--bg-active-color);
 }
 
 .resize {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  right: -5px;
-  bottom: -5px;
-  background: white;
-  border: 1px solid #000;
-  z-index: 1000;
-  cursor: se-resize;
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    right: -5px;
+    bottom: -5px;
+    background: white;
+    border: 1px solid #000;
+    z-index: 1000;
+    cursor: se-resize;
 }
 
 .resize-handle {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background: white;
-  border: 1px solid #000;
-  z-index: 1000;
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: white;
+    border: 1px solid #000;
+    z-index: 1000;
 }
 
-.resize-handle.br { right: -5px; bottom: -5px; cursor: se-resize; }
-.resize-handle.bl { left: -5px; bottom: -5px; cursor: sw-resize; }
-.resize-handle.tr { right: -5px; top: -5px; cursor: ne-resize; }
-.resize-handle.tl { left: -5px; top: -5px; cursor: nw-resize; }
+.resize-handle.br {
+    right: -5px;
+    bottom: -5px;
+    cursor: se-resize;
+}
+
+.resize-handle.bl {
+    left: -5px;
+    bottom: -5px;
+    cursor: sw-resize;
+}
+
+.resize-handle.tr {
+    right: -5px;
+    top: -5px;
+    cursor: ne-resize;
+}
+
+.resize-handle.tl {
+    left: -5px;
+    top: -5px;
+    cursor: nw-resize;
+}
