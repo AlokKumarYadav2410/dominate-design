@@ -197,9 +197,62 @@ function deleteSelectedElement() {
   if (elemDOM) {
     elemDOM.remove();
   }
-
   saveState();
   state.selectedId = null;
+}
+
+let dragOffsetX = 0;
+let dragOffsetY = 0;
+let isDragging = false;
+
+canvas.addEventListener('mousedown', (e) => {
+  const target = e.target.closest('[data-id]');
+  if (!target) return;
+
+  const id = target.dataset.id;
+  selectElement(id);
+
+  const elem = state.elements.find(el => el.id === id);
+  isDragging = true;
+
+  dragOffsetX = e.clientX - elem.x;
+  dragOffsetY = e.clientY - elem.y;
+
+  console.log('dragOffsetX:', dragOffsetX)
+  console.log('dragOffsetY:', dragOffsetY)
+  console.log('e.clientX:', e.clientX)
+  console.log('e.clientY:', e.clientY)
+  console.log("elem.x", elem.x)
+  console.log("elem.y", elem.y)
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (!isDragging || !state.selectedId) return;
+
+  const elem = state.elements.find(
+    el => el.id === state.selectedId
+  );
+
+  elem.x = e.clientX - dragOffsetX;
+  elem.y = e.clientY - dragOffsetY;
+
+  console.log("elem.x", elem.x)
+  console.log("elem.y", elem.y)
+  console.log('e.clientX below:', e.clientX)
+  console.log('e.clientY below:', e.clientY)
+
+  saveState();
+  updateDOM(elem);
+});
+
+document.addEventListener('mouseup', () => {
+  isDragging = false;
+});
+
+function updateDOM(elem) {
+  const dom = document.querySelector(`[data-id="${elem.id}"]`);
+  dom.style.left = elem.x + 'px';
+  dom.style.top = elem.y + 'px';
 }
 
 function renderElement(el) {
