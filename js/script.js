@@ -274,6 +274,7 @@ document.addEventListener('mousemove', (e) => {
       elem.y = startTop + dy;
     }
 
+    clampElementToCanvas(elem);
     updateDOM(elem);
     updateDOMSize(elem);
     saveState();
@@ -289,6 +290,7 @@ document.addEventListener('mousemove', (e) => {
   elem.x = e.clientX - dragOffsetX;
   elem.y = e.clientY - dragOffsetY;
 
+  clampElementToCanvas(elem);
   updateDOM(elem);
   saveState();
 });
@@ -360,6 +362,14 @@ function renderElement(el) {
 
   saveState();
   canvas.appendChild(div);
+}
+
+function clampElementToCanvas(elem) {
+  const maxX = canvas.clientWidth - elem.width;
+  const maxY = canvas.clientHeight - elem.height;
+
+  elem.x = Math.max(0, Math.min(elem.x, maxX));
+  elem.y = Math.max(0, Math.min(elem.y, maxY));
 }
 
 function saveState() {
