@@ -202,3 +202,55 @@ document.addEventListener('mouseup', () => {
   isResizing = false;
   resizeDirection = null;
 });
+
+// KEYBOARD EVENT HANDLERS
+document.addEventListener('keydown', (e) => {
+  if (!state.selectedId) return;
+
+  const elem = state.elements.find(el => el.id === state.selectedId);
+  if (!elem) return;
+
+  const moveDistance = 5;
+
+  switch (e.key) {
+    case 'Delete':
+      e.preventDefault();
+      deleteSelectedElement();
+      break;
+
+    case 'ArrowUp':
+      e.preventDefault();
+      elem.y = Math.max(0, elem.y - moveDistance);
+      clampElementToCanvas(elem);
+      updateDOM(elem);
+      saveState();
+      break;
+
+    case 'ArrowDown':
+      e.preventDefault();
+      elem.y = Math.min(canvas.clientHeight - elem.height, elem.y + moveDistance);
+      clampElementToCanvas(elem);
+      updateDOM(elem);
+      saveState();
+      break;
+
+    case 'ArrowLeft':
+      e.preventDefault();
+      elem.x = Math.max(0, elem.x - moveDistance);
+      clampElementToCanvas(elem);
+      updateDOM(elem);
+      saveState();
+      break;
+
+    case 'ArrowRight':
+      e.preventDefault();
+      elem.x = Math.min(canvas.clientWidth - elem.width, elem.x + moveDistance);
+      clampElementToCanvas(elem);
+      updateDOM(elem);
+      saveState();
+      break;
+
+    default:
+      break;
+  }
+});
