@@ -11,13 +11,35 @@ function addLayerToPanel(elem) {
   layerName.className = 'layer-name';
   layerName.textContent = elem.type.charAt(0).toUpperCase() + elem.type.slice(1);
   
+  const layerControls = document.createElement('div');
+  layerControls.className = 'layer-controls';
+  
+  const moveUpBtn = document.createElement('i');
+  moveUpBtn.className = 'ri-arrow-up-s-line layer-btn';
+  moveUpBtn.title = 'Move Up';
+  moveUpBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    moveLayerUp(elem.id);
+  });
+  
+  const moveDownBtn = document.createElement('i');
+  moveDownBtn.className = 'ri-arrow-down-s-line layer-btn';
+  moveDownBtn.title = 'Move Down';
+  moveDownBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    moveLayerDown(elem.id);
+  });
+  
   const layerVisibility = document.createElement('i');
   layerVisibility.className = 'ri-eye-line layer-visibility';
   layerVisibility.dataset.visible = 'true';
   
   layerItem.appendChild(layerIcon);
   layerItem.appendChild(layerName);
-  layerItem.appendChild(layerVisibility);
+  layerControls.appendChild(moveUpBtn);
+  layerControls.appendChild(moveDownBtn);
+  layerControls.appendChild(layerVisibility);
+  layerItem.appendChild(layerControls);
   
   layerItem.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -123,4 +145,22 @@ function updateZIndexFromLayers() {
     }
   });
   saveState();
+}
+
+function moveLayerUp(id) {
+  const layerItem = layersPanel.querySelector(`[data-id="${id}"]`);
+  
+  if (layerItem && layerItem.previousElementSibling) {
+    layerItem.parentNode.insertBefore(layerItem, layerItem.previousElementSibling);
+    updateZIndexFromLayers();
+  }
+}
+
+function moveLayerDown(id) {
+  const layerItem = layersPanel.querySelector(`[data-id="${id}"]`);
+  
+  if (layerItem && layerItem.nextElementSibling) {
+    layerItem.parentNode.insertBefore(layerItem.nextElementSibling, layerItem);
+    updateZIndexFromLayers();
+  }
 }
