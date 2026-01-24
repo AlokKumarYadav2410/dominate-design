@@ -12,6 +12,13 @@ imageBtn.addEventListener('click', () => {
 
 deleteBtn.addEventListener('click', deleteSelectedElement);
 
+// Export handlers
+const exportJsonBtn = document.querySelector('#export-json');
+const exportHtmlBtn = document.querySelector('#export-html');
+
+exportJsonBtn.addEventListener('click', exportAsJSON);
+exportHtmlBtn.addEventListener('click', exportAsHTML);
+
 // Image upload handler
 imageInput.addEventListener('change', (event) => {
   const file = event.target.files[0];
