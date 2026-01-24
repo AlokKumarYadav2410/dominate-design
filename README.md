@@ -6,6 +6,8 @@ A powerful, intuitive browser-based design application for creating and editing 
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Status](https://img.shields.io/badge/status-active-brightgreen)
 
+![Dominate Design Screenshot](./assets/preview.png)
+
 ## ✨ Features
 
 ### Core Design Tools
