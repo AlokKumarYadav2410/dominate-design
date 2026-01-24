@@ -11,20 +11,20 @@ function showPropertiesPanel(id) {
   }
   
   // Width and Height for all types
-  addPropertyInput('width', 'Width:', elem.width, (value) => {
+  addPropertyInput('width', 'Width', elem.width, (value) => {
     elem.width = Math.max(20, parseInt(value));
     updateDOMSize(elem);
     saveState();
   });
   
-  addPropertyInput('height', 'Height:', elem.height, (value) => {
+  addPropertyInput('height', 'Height', elem.height, (value) => {
     elem.height = Math.max(20, parseInt(value));
     updateDOMSize(elem);
     saveState();
   });
   
   // Color property for all types
-  addPropertyColorInput('color', 'Color:', elem.styles.backgroundColor || elem.styles.color || '#ffffff', (value) => {
+  addPropertyColorInput('color', 'Color', elem.styles.backgroundColor || elem.styles.color || '#ffffff', (value) => {
     if (elem.type === 'text') {
       elem.styles.color = value;
       const domElem = canvas.querySelector(`[data-id="${elem.id}"]`);
@@ -41,7 +41,7 @@ function showPropertiesPanel(id) {
   });
   
   // Rotation for all types
-  addPropertyInput('rotation', 'Rotation:', elem.rotation || 0, (value) => {
+  addPropertyInput('rotation', 'Rotation', elem.rotation || 0, (value) => {
     elem.rotation = parseInt(value) % 360;
     const domElem = canvas.querySelector(`[data-id="${elem.id}"]`);
     if (domElem) {
@@ -51,7 +51,7 @@ function showPropertiesPanel(id) {
   }, 'range', 0, 360, 'deg');
   
   // Opacity for all types
-  addPropertyInput('opacity', 'Opacity:', elem.opacity, (value) => {
+  addPropertyInput('opacity', 'Opacity', elem.opacity, (value) => {
     elem.opacity = parseInt(value);
     const domElem = canvas.querySelector(`[data-id="${elem.id}"]`);
     if (domElem) {
@@ -62,7 +62,7 @@ function showPropertiesPanel(id) {
   
   // Type-specific properties for TEXT
   if (elem.type === 'text') {
-    addPropertyInput('text-content', 'Text:', elem.styles.text, (value) => {
+    addPropertyInput('text-content', 'Text', elem.styles.text, (value) => {
       elem.styles.text = value;
       const domElem = canvas.querySelector(`[data-id="${elem.id}"]`);
       const span = domElem?.querySelector('span');
@@ -70,7 +70,7 @@ function showPropertiesPanel(id) {
       saveState();
     }, 'text');
     
-    addPropertyInput('font-size', 'Font Size (px):', elem.styles.fontSize || 16, (value) => {
+    addPropertyInput('font-size', 'Font Size (px)', elem.styles.fontSize || 16, (value) => {
       elem.styles.fontSize = parseInt(value);
       const domElem = canvas.querySelector(`[data-id="${elem.id}"]`);
       const span = domElem?.querySelector('span');
