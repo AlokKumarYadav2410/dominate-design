@@ -54,6 +54,23 @@ html::selection {
     color: var(--bg-danger-color);
 }
 
+.toolbar-divider {
+    width: 1px;
+    height: 30px;
+    background-color: var(--border-active-color);
+    margin: 0 10px;
+}
+
+#export-json:hover {
+    background-color: var(--bg-success-color);
+    color: var(--text-primary-color);
+}
+
+#export-html:hover {
+    background-color: var(--bg-warning-color);
+    color: var(--text-primary-color);
+}
+
 /* EDITOR */
 #editor {
     width: 100%;
@@ -82,6 +99,7 @@ html::selection {
     margin-bottom: var(--gutter-md);
     color: var(--text-primary-color);
     font-size: var(--font-size-xl);
+    opacity: 0.7;
 }
 
 .no-layers {
@@ -195,6 +213,26 @@ html::selection {
     white-space: nowrap;
 }
 
+.layer-controls {
+    display: flex;
+    gap: var(--gutter-xs);
+    align-items: center;
+}
+
+.layer-btn {
+    font-size: var(--font-size-md);
+    cursor: pointer;
+    padding: var(--padding-xs);
+    transition: all 0.2s ease-in-out;
+    border-radius: var(--border-radius-sm);
+}
+
+.layer-btn:hover {
+    transform: scale(1.15);
+    color: var(--border-primary-color);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
 .layer-visibility {
     font-size: var(--font-size-md);
     cursor: pointer;
@@ -221,6 +259,7 @@ html::selection {
     margin-bottom: var(--gutter-md);
     color: var(--text-primary-color);
     font-size: var(--font-size-xl);
+    opacity: 0.7;
 }
 
 .selection {
@@ -424,7 +463,7 @@ html::selection {
 
 #canvas {
     width: 4000px;
-    height: 2000px;
+    height: 1000px;
     overflow: auto;
     position: relative;
     background-image: radial-gradient(#444 1px, transparent 1px);
